@@ -3,7 +3,7 @@
 '''
 Created on 14 dec 2012
 
-@author: kristofer
+@author: Kristofer Svärd
 '''
 import json
 import re
@@ -18,7 +18,7 @@ def readTemperature(deviceId):
     lines = rawReponse.split("\n")
     for line in lines:
         m = re.match("\S+\s+\S+\s+(?P<id>\d+)\s+(?P<temp>\S+)\s+\S+\s+(?P<date>\S+ \S+)", line)
-        if (m):
+        if m:
             if (int(m.group("id")) == deviceId):
                 tempDict["id"] = int(m.group("id"))
                 tempDict["temp"] = float(m.group("temp").strip("°"))
