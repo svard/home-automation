@@ -3,6 +3,10 @@ home-automation
 
 Scripts for managing my home automation tasks.
 
-ReadTemp.py
+readtemp.py
 -----------
 Parses a temperature and time reading reported by a Tellstick Duo. Sends the result as JSON to a web service.
+
+lightswitch.py
+--------------
+Switches a light on or off and saves the new state in a remote redis store.
