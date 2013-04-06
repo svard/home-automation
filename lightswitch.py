@@ -18,7 +18,7 @@ def switchLight(state, id):
     m = re.search("Success", response)
     if m == None:
         print "Failed switching light %s %s" % (id, state)
-        sys.exit(0)
+        sys.exit(1)
     else:
         redisServer.hset("light:%s" % id, "state", string.upper(state))
         
@@ -47,4 +47,4 @@ if __name__ == "__main__":
     elif args.init:
         initLight()
     
-    sys.exit(1)
+    sys.exit(0)
