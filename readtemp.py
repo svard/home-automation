@@ -47,7 +47,7 @@ def reportTemperature(temp, name, host):
         bufferTemperature(temp, name)
     else:
         f.close()
-        logging.info("Reported a temp. of " + str(temp["temp"]) + " degrees at " + temp["date"])
+#        logging.info("Reported a temp. of " + str(temp["temp"]) + " degrees at " + temp["date"])
         
 def bufferTemperature(temp, name):
     dbConn = __connectDb()
@@ -81,7 +81,7 @@ def sendBuffer(host):
             except urllib2.URLError, e:
                 logging.error("Failed to send measurement.")
             finally:
-                logging.info("Reported a temp. of " + str(row["temperature"]) + " degrees at " + row["date_str"])
+                logging.debug("Reported a temp. of " + str(row["temperature"]) + " degrees at " + row["date_str"])
                 logging.debug("DELETE FROM tempbuffer WHERE buffer_id=%d" % row["buffer_id"])
                 cursor.execute("DELETE FROM tempbuffer WHERE buffer_id=%d" % row["buffer_id"])
                 dbConn.commit()
@@ -116,7 +116,7 @@ def __haveBuffer():
             logging.debug("%d buffered temperatures exists." % int(cursor.rowcount))
             return True
         else:
-            logging.debug("No buffered temperatures exists.")
+#            logging.debug("No buffered temperatures exists.")
             return False
         
     except mysql.Error, e:
