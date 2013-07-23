@@ -12,6 +12,7 @@ import redis
 import string
 import sys
 
+# a useless comment
 def switchLight(state, id):
     redisServer = redis.Redis("192.168.0.108")
     response = subprocess.Popen(["tdtool", "--%s" % state, id], stdout=subprocess.PIPE).stdout.read()
