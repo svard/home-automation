@@ -6,6 +6,7 @@ Created on 14 dec 2012
 @author: Kristofer Svärd
 '''
 import json
+import clj
 import re
 import subprocess
 import urllib2
@@ -51,7 +52,7 @@ def reportTemperature(temp, name, host):
 #        logging.info("Reported a temp. of " + str(temp["temp"]) + " degrees at " + temp["date"])
 
 def publishTemperature(temp, name, host):
-    data = json.dumps({"deviceId": temp["id"], "deviceName": name, "temperature": temp["temp"], "date": temp["unixdate"], "dateStr": temp["date"]})
+    data = clj.dumps({"deviceId": temp["id"], "deviceName": name, "temperature": temp["temp"], "date": temp["unixdate"], "dateStr": temp["date"]})
 
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
     channel = connection.channel()
@@ -169,8 +170,5 @@ if __name__ == '__main__':
         publishTemperature(result, deviceName, host)
     else:
         reportTemperature(result, deviceName, host)
-
-#     result = readTemperature(deviceId)
-#     reportTemperature(result, deviceName, host)
 
     sys.exit(0)
