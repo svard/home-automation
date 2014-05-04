@@ -12,7 +12,6 @@ import redis
 import string
 import sys
 
-# a useless comment
 def switchLight(state, id):
     redisServer = redis.Redis("192.168.0.108")
     response = subprocess.Popen(["tdtool", "--%s" % state, id], stdout=subprocess.PIPE).stdout.read()
@@ -22,7 +21,7 @@ def switchLight(state, id):
         sys.exit(1)
     else:
         redisServer.hset("light:%s" % id, "state", string.upper(state))
-        
+
 def initLight():
     redisServer = redis.Redis("192.168.0.108")
     response = subprocess.Popen(["tdtool", "--list"], stdout=subprocess.PIPE).stdout.read()
@@ -31,7 +30,7 @@ def initLight():
         m = re.match("(?P<id>\d+)\s+(?P<name>\S+)\s+(?P<state>\S+)", line)
         if m:
             redisServer.hmset("light:%s" % m.group("id"), {"id": m.group("id"), "name": m.group("name"), "state": m.group("state")})
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -40,12 +39,12 @@ if __name__ == "__main__":
     group.add_argument("--off", dest="off", metavar="ID", default=None, help="light off")
     group.add_argument("--init", dest="init", default=False, action="store_true", help="initialise the redis store")
     args = parser.parse_args()
-    
+
     if args.on:
         switchLight("on", args.on)
     elif args.off:
         switchLight("off", args.off)
     elif args.init:
         initLight()
-    
+
     sys.exit(0)

@@ -6,14 +6,13 @@ Created on 14 dec 2012
 @author: Kristofer Svärd
 '''
 import json
-import clj
 import re
 import subprocess
 import urllib2
 import sys
 import logging
 import MySQLdb as mysql
-import pika
+import rabbitMQ
 from datetime import datetime
 from optparse import OptionParser
 
@@ -52,14 +51,9 @@ def reportTemperature(temp, name, host):
 #        logging.info("Reported a temp. of " + str(temp["temp"]) + " degrees at " + temp["date"])
 
 def publishTemperature(temp, name, host):
-    data = clj.dumps({"deviceId": temp["id"], "deviceName": name, "temperature": temp["temp"], "date": temp["unixdate"], "dateStr": temp["date"]})
+    data = json.dumps({"deviceId": temp["id"], "deviceName": name, "temperature": temp["temp"], "date": temp["unixdate"], "dateStr": temp["date"]})
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
-    channel = connection.channel()
-
-    channel.exchange_declare(exchange='automation', type='direct')
-    channel.basic_publish(exchange='automation', routing_key='temps', body=data)
-    connection.close()
+    rabbitMQ.publish("temps", data)
 
 def bufferTemperature(temp, name):
     dbConn = __connectDb()
