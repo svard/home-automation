@@ -13,6 +13,7 @@ import sys
 import logging
 import MySQLdb as mysql
 import rabbitMQ
+import time
 from datetime import datetime
 from optparse import OptionParser
 
@@ -23,7 +24,8 @@ def readTemperature(deviceId):
     rawReponse = subprocess.Popen(["tdtool", "--list"], stdout=subprocess.PIPE).stdout.read()
     lines = rawReponse.split("\n")
     for line in lines:
-        m = re.match("\S+\s+\S+\s+(?P<id>\d+)\s+(?P<temp>\S+)\s+\S+\s+(?P<date>\S+ \S+)", line)
+#         m = re.match("\S+\s+\S+\s+(?P<id>\d+)\s+(?P<temp>\S+)\s+\S+\s+(?P<date>\S+ \S+)", line)
+        m = re.match("\S+\s+\S+\s+(?P<id>\d+)\s+(?P<temp>\S+)\s+(?P<date>\S+ \S+)", line)
         if m:
             if (int(m.group("id")) == deviceId):
                 tempDict["id"] = int(m.group("id"))
@@ -51,7 +53,8 @@ def reportTemperature(temp, name, host):
 #        logging.info("Reported a temp. of " + str(temp["temp"]) + " degrees at " + temp["date"])
 
 def publishTemperature(temp, name, host):
-    data = json.dumps({"deviceId": temp["id"], "deviceName": name, "temperature": temp["temp"], "date": temp["unixdate"], "dateStr": temp["date"]})
+    utctime = time.strftime('%Y-%m-%dT%H:%M:%SZ', datetime.utcfromtimestamp(temp["unixdate"]).timetuple())
+    data = json.dumps({"deviceId": temp["id"], "deviceName": name, "temperature": temp["temp"], "date": utctime, "dateStr": temp["date"]})
 
     rabbitMQ.publish("temps", data)
 
