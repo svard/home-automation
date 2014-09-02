@@ -33,7 +33,7 @@ def readTemperatureValue():
     return round(tempVal, 1)
 
 def getLightState(host, id):
-    url = host + "/api/light/" + str(id)
+    url = host + "/services/api/light/" + str(id)
     logging.debug("Querying %s", url)
 
     request = urllib2.Request(url)
@@ -82,7 +82,7 @@ def turnOnLight(host, id):
 
     if currState == "OFF" and currHour > 12 and currHour < 23:
         logging.info("Turning on light: %d", id)
-        url = host + "/api/light/" + str(id)
+        url = host + "/services/api/light/" + str(id)
         data = json.dumps({"state": "ON"})
         request = urllib2.Request(url, data.encode('utf-8'), {"Content-Type": "application/json"})
         request.get_method = lambda: 'PUT'

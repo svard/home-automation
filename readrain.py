@@ -43,7 +43,7 @@ def getRainRate(currentRainTotal):
     if rainTotal and rainTotal > currentRainTotal:
         return 0.0
     elif rainTotal:
-        return currentRainTotal - rainTotal
+        return round((currentRainTotal - rainTotal), 1)
     else:
         return 0.0
 
