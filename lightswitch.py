@@ -11,16 +11,15 @@ import argparse
 import redis
 import string
 import sys
+import urllib2
+import json
 
 def switchLight(state, id):
-    redisServer = redis.Redis("192.168.0.108")
-    response = subprocess.Popen(["tdtool", "--%s" % state, id], stdout=subprocess.PIPE).stdout.read()
-    m = re.search("Success", response)
-    if m == None:
-        print "Failed switching light %s %s" % (id, state)
-        sys.exit(1)
-    else:
-        redisServer.hset("light:%s" % id, "state", string.upper(state))
+    url = "http://tomcat.kristofersvard.se/services/api/light/" + str(id)
+    data = json.dumps({"state": state})
+    request = urllib2.Request(url, data.encode('utf-8'), {"Content-Type": "application/json"})
+    request.get_method = lambda: 'PUT'
+    response = urllib2.urlopen(request)
 
 def initLight():
     redisServer = redis.Redis("192.168.0.108")
@@ -41,9 +40,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.on:
-        switchLight("on", args.on)
+        switchLight("ON", args.on)
     elif args.off:
-        switchLight("off", args.off)
+        switchLight("OFF", args.off)
     elif args.init:
         initLight()
 
