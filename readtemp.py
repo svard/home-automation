@@ -19,17 +19,16 @@ from optparse import OptionParser
 
 logging.basicConfig(format='%(levelname)s:%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', filename='/home/kristofer/logs/readtemp.log', level=logging.DEBUG)
 
-def readTemperature(deviceId):
+def readTemperature():
     tempDict = {}
-    rawReponse = subprocess.Popen(["tdtool", "--list"], stdout=subprocess.PIPE).stdout.read()
+    rawReponse = subprocess.Popen(["tdtool", "--list-sensors"], stdout=subprocess.PIPE).stdout.read()
     lines = rawReponse.split("\n")
     for line in lines:
-#         m = re.match("\S+\s+\S+\s+(?P<id>\d+)\s+(?P<temp>\S+)\s+\S+\s+(?P<date>\S+ \S+)", line)
-        m = re.match("\S+\s+\S+\s+(?P<id>\d+)\s+(?P<temp>\S+)\s+(?P<date>\S+ \S+)", line)
+        m = re.match("\S+=(?P<type>\S+)\t\S+=(?P<protocol>\S+)\t\S+=(?P<model>\S+)\t\S+=(?P<id>\d+)\t\S+=(?P<temperature>\d+.\d+)\t\S+=(?P<humidity>\d+)\t\S+=(?P<date>\d+-\d+-\d+ \d+:\d+:\d+)\t\S+=(?P<age>\d+)", line)
         if m:
-            if (int(m.group("id")) == deviceId):
+            if (m.group("model") == "F824"):
                 tempDict["id"] = int(m.group("id"))
-                tempDict["temp"] = float(m.group("temp").strip("°"))
+                tempDict["temp"] = float(m.group("temperature"))
                 tempDict["date"] = m.group("date")
                 mydate = datetime.strptime(m.group("date"), "%Y-%m-%d %H:%M:%S")
                 tempDict["unixdate"] = int(mydate.strftime("%s"))
@@ -143,8 +142,6 @@ if __name__ == '__main__':
                   help="host to send temperature reading to", metavar="HOST", action="store", type="string")
     parser.add_option("-n", "--name", dest="name",
                   help="name of this temperature sensor", metavar="NAME", action="store", type="string")
-    parser.add_option("-i", "--id", dest="id",
-                  help="device id to read", metavar="ID", action="store", type="int")
     parser.add_option("-p", "--publish", dest="pub",
                   help="publish to message bus", action="store_true")
     (options, args) = parser.parse_args()
@@ -157,12 +154,8 @@ if __name__ == '__main__':
         parser.error("Name is missing")
     else:
         deviceName = options.name
-    if(options.id == None):
-        parser.error("Id is missing")
-    else:
-        deviceId = options.id
 
-    result = readTemperature(deviceId)
+    result = readTemperature()
     if(options.pub):
         publishTemperature(result, deviceName, host)
     else:

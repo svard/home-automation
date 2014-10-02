@@ -47,22 +47,26 @@ def getRainRate(currentRainTotal):
     else:
         return 0.0
 
-def readRainLevel(id):
+def readRainLevel():
     rainDict = {}
     rawReponse = subprocess.Popen(["tdtool", "--list-sensors"], stdout=subprocess.PIPE).stdout.read()
     lines = rawReponse.split("\n")
     for line in lines:
         m = re.match("\S+=(?P<type>\S+)\t\S+=(?P<protocol>\S+)\t\S+=(?P<model>\S+)\t\S+=(?P<id>\d+)\t\S+=(?P<rainrate>\d+.\d+)\t\S+=(?P<raintotal>\d+.\d+)", line)
+        n = re.match("\S+=(?P<type>\S+)\t\S+=(?P<protocol>\S+)\t\S+=(?P<model>\S+)\t\S+=(?P<id>\d+)\t\S+=(?P<temperature>\d+.\d+)\t\S+=(?P<humidity>\d+)\t\S+=(?P<date>\d+-\d+-\d+ \d+:\d+:\d+)\t\S+=(?P<age>\d+)", line)
         if m:
-            if int(m.group("id")) == id:
+            if m.group("model") == "2914":
                 rainDict["id"] = int(m.group("id"))
                 rainDict["rainrate"] = getRainRate(float(m.group("raintotal")))
                 rainDict["date"] = getUTCTimeString()
+        if n:
+            if n.group("model") == "F824":
+                rainDict["humidity"] = int(n.group("humidity"))
 
     return rainDict
 
 def publishRainLevel(rain, name, host):
-    data = json.dumps({"deviceId": rain["id"], "deviceName": name, "rainrate": rain["rainrate"], "date": rain["date"]})
+    data = json.dumps({"deviceId": rain["id"], "deviceName": name, "rainrate": rain["rainrate"], "humidity": rain["humidity"], "date": rain["date"]})
 
     rabbitMQ.publish("rain", data, host)
 
@@ -72,8 +76,6 @@ if __name__ == '__main__':
                   help="host to send rain reading to", metavar="HOST", action="store", type="string")
     parser.add_option("-n", "--name", dest="name",
                   help="name of this rain sensor", metavar="NAME", action="store", type="string")
-    parser.add_option("-i", "--id", dest="id",
-                  help="device id to read", metavar="ID", action="store", type="int")
 
     (options, args) = parser.parse_args()
 
@@ -85,12 +87,8 @@ if __name__ == '__main__':
         parser.error("Name is missing")
     else:
         deviceName = options.name
-    if(options.id == None):
-        parser.error("Id is missing")
-    else:
-        id = options.id
 
-    result = readRainLevel(id)
+    result = readRainLevel()
     publishRainLevel(result, deviceName, host)
 
     sys.exit(0)
