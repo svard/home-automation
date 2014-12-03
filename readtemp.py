@@ -24,9 +24,9 @@ def readTemperature():
     rawReponse = subprocess.Popen(["tdtool", "--list-sensors"], stdout=subprocess.PIPE).stdout.read()
     lines = rawReponse.split("\n")
     for line in lines:
-        m = re.match("\S+=(?P<type>\S+)\t\S+=(?P<protocol>\S+)\t\S+=(?P<model>\S+)\t\S+=(?P<id>\d+)\t\S+=(?P<temperature>\d+.\d+)\t\S+=(?P<humidity>\d+)\t\S+=(?P<date>\d+-\d+-\d+ \d+:\d+:\d+)\t\S+=(?P<age>\d+)", line)
+        m = re.match("\S+=(?P<type>\S+)\t\S+=(?P<protocol>\S+)\t\S+=(?P<model>\S+)\t\S+=(?P<id>\d+)\t\S+=(?P<temperature>-?\d+.\d+)\t\S+=(?P<date>\d+-\d+-\d+ \d+:\d+:\d+)\t\S+=(?P<age>\d+)", line)
         if m:
-            if (m.group("model") == "F824"):
+            if (m.group("model") == "temperature"):
                 tempDict["id"] = int(m.group("id"))
                 tempDict["temp"] = float(m.group("temperature"))
                 tempDict["date"] = m.group("date")
